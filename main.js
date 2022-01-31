@@ -1,11 +1,14 @@
 async function main() {
     const userObj = new User();
     console.log(await userObj.getAll());
+    // await userObj.add("Patrick","Yes","Z@Z");
+    // console.log(await userObj.getAll());
 }
 
 
 class User {
     usersRef = db.collection("users");
+    seriesRef = db.collection("series");
 
     async add(name, password, email) {
         const user = { name, password, email};
@@ -25,11 +28,26 @@ class User {
     async getAll() {
         const users = [];
 
+        // Get series
+        try {
+            const seriessnapshot = await this.seriesRef.get();
+            console.log("All docs: " + seriessnapshot.docs);
+            seriessnapshot.forEach(doc => console.log(doc.data()));
+            seriessnapshot.forEach(doc => console.log("ID:" + doc.id));
+        }
+        catch (err) {
+            console.error('OOops!', err);
+        }
+
         try {
             const snapshot = await this.usersRef.get()
-            snapshot.forEach(doc => users.push({id: doc.id, ...doc.data()}))
+            snapshot.forEach(doc => {
+                users.push({id: doc.id, ...doc.data()});
+                console.log(doc.data().Series);
+                // console.log(users);
+            })
         } catch (err) {
-            console.error('Error Getting Users: ', error);
+            console.error('Error Getting Users: ', err);
         }
 
         return users;
